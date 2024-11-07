@@ -1,6 +1,5 @@
 #include <iostream>
 #include <cstdlib>
-#include <vector>
 #include <filesystem>
 #include <fstream>
 #include <unordered_map>
@@ -53,10 +52,11 @@ private:
 
 public:
 	Swipe(){
-		//system("clear");
+		system("clear");
 		if(!filesystem::exists(".swipe")){
 			filesystem::create_directory(".swipe");
 		}
+
 		m_projects = getProjects();
 	}
 
@@ -67,7 +67,7 @@ public:
 		std::cout << "\n";
 	}
 
-	void mainMenu(){
+	void viewProjects(){
 		int option;
 		std::cout << ANSI_COLOUR_GREEN "Your projects: \n" ANSI_COLOUR_RESET;
 
@@ -75,9 +75,37 @@ public:
 			std::cout << ANSI_COLOUR_BLUE << project.first << ANSI_COLOUR_RESET<< ". ";
 			printProject(project.second);
 		}
+	}
 
-		std::cout << "Which project do you want to swipe through today? ";
-		std::cin >> option;
+	void run(){
+		char option;
+		bool running = 1;
+		std::cout << "Swipe v0.1 by henryisaway\nPlease report anybugs at https://github.com/henryisaway/Swipe/issues\n\n";
+		viewProjects();
+
+		std::cout << "\n+---------------------------+\n";
+		std::cout << "[o] Open a project\n";
+		std::cout << "[s] Start new project\n";
+		std::cout << "[d] Delete project\n";
+		std::cout << "[q] Quite Swipe\n";
+		std::cout << "What would you like to do? ";
+
+		while(running){
+			std::cin >> option;
+			if(option == 'o'){
+				//something goes here
+			} else if(option == 's'){
+				//something goes here
+			} else if(option == 'd'){
+				//something goes here
+			} else if(option == 'q'){
+				std::cout << "Quitting Swipe.\n";
+				running = 0;
+			}
+			 else {
+				std::cout << "Invalid command, try again.\n";
+			}
+		}
 	}
 
 	void createProject(const string& name){
@@ -93,9 +121,9 @@ public:
 
 int main(int argc, char** argv){
 	Swipe swipe;
+
 	if(argc < 2){
-		swipe.mainMenu();
-		swipe.createProject("Jynx");
+		swipe.run();
 	} else {
 		string arg = argv[1];
 	}
