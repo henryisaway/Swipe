@@ -34,6 +34,12 @@ public:
 		int ascii = m_status;
 		return (char)(ascii + 48);
 	}
+
+	void printTask(){
+		std::cout << m_name << "\n";
+		std::cout << m_description << "\n";
+		std::cout << m_status << "\n";
+	}
 };
 
 class Swipe{
@@ -73,14 +79,48 @@ private:
 		file.close();
 	}
 
-	void createTask(const string& name, const string& description){
-		//Task task(name, description);
+	void createTask(string& name, string& description){
+		string status = "0";
+		Task task(name, description, status);
 	}
 
 
+	void saveTasks(const string& filepath){ // TODO make Swipe remember working directory
+		std::ofstream file(filepath);
+
+		for(auto& task : m_tasks){
+			file << "Task: " << task.second.getName() << "\n";
+			file << "Desc: " << task.second.getDescription() << "\n";
+			file << "Stat: " << task.second.getStatus() << "\n";	
+		}
+		file.close();
+	}
+
+	void loadTasks(const string& filepath){
+		std::ifstream file(filepath);
+		if(!file.is_open()){
+			std::cout << "There was an error loading the project file.\n";
+		}
+
+		string line, name, desc, stat;
+		int i = 0;
+		while(std::getline(file, line)){
+			name = line.substr(6);
+			std::getline(file, line);
+			desc = line.substr(6);
+			std::getline(file, line);
+			stat = line.substr(6);
+
+			Task task(name, desc, stat);
+			std::pair<int, Task> taskpair(i, task);
+			m_tasks.insert(taskpair);
+			i++;
+		}
+	}
+
 	std::unordered_map<int, string> m_projects;
-	std::unordered_map<int, Task> m_tasks;
-	unsigned int taskIndex;
+	std::unordered_map<int, Task> m_tasks;		// Tasks from the loaded project file
+	string directory;
 
 public:
 	Swipe(){
@@ -90,16 +130,6 @@ public:
 		}
 
 		m_projects = getProjects();
-	}
-
-	void saveTask(const string& filepath, Task& task){
-		std::ofstream file(filepath);
-
-		file << "Task: " << task.getName() << "\n";
-		file << "Desc: " << task.getDescription() << "\n";
-		file << "Stat: " << task.getStatus() << "\n";
-
-		file.close();
 	}
 
 	void run(){
@@ -137,14 +167,9 @@ public:
 
 int main(int argc, char** argv){
 	Swipe swipe;
-	
-	string name = "Test";
-	string desc = "This task is a test.";
-	string stat = "0";
-	Task task(name, desc, stat);
 
 	if(argc < 2){
-		swipe.saveTask(".swipe/Jynx.swipe", task);
+		swipe.run();
 	} else {
 		string arg = argv[1];
 	}
