@@ -12,13 +12,14 @@ class Task{
 private:
 	string m_name;
 	string m_description;
-	bool m_done;
+	bool m_status;
 
 public:
-	Task(string name, string description){
+	Task(string& name, string& description, string& status){
 		m_name = name;
 		m_description = description;
-		m_done = 0;
+		int temp = (int) status[0];
+		m_status = temp - 48;
 	}
 
 	string getName(){
@@ -29,8 +30,9 @@ public:
 		return m_description;
 	}
 
-	int getStatus(){
-		return m_done;
+	char getStatus(){
+		int ascii = m_status;
+		return (char)(ascii + 48);
 	}
 };
 
@@ -46,18 +48,6 @@ private:
 			i++;
 		}
 		return projects;
-	}
-
-	std::unordered_map<int, string> m_projects;
-
-public:
-	Swipe(){
-		system("clear");
-		if(!filesystem::exists(".swipe")){
-			filesystem::create_directory(".swipe");
-		}
-
-		m_projects = getProjects();
 	}
 
 	void printProject(const string& project){
@@ -77,10 +67,45 @@ public:
 		}
 	}
 
+	void createProject(const string& name){
+		string filepath = ".swipe/" + name + ".swipe";
+		std::ofstream file(filepath);
+		file.close();
+	}
+
+	void createTask(const string& name, const string& description){
+		//Task task(name, description);
+	}
+
+
+	std::unordered_map<int, string> m_projects;
+	std::unordered_map<int, Task> m_tasks;
+	unsigned int taskIndex;
+
+public:
+	Swipe(){
+		system("clear");
+		if(!filesystem::exists(".swipe")){
+			filesystem::create_directory(".swipe");
+		}
+
+		m_projects = getProjects();
+	}
+
+	void saveTask(const string& filepath, Task& task){
+		std::ofstream file(filepath);
+
+		file << "Task: " << task.getName() << "\n";
+		file << "Desc: " << task.getDescription() << "\n";
+		file << "Stat: " << task.getStatus() << "\n";
+
+		file.close();
+	}
+
 	void run(){
 		char option;
 		bool running = 1;
-		std::cout << "Swipe v0.1 by henryisaway\nPlease report anybugs at https://github.com/henryisaway/Swipe/issues\n\n";
+		std::cout << "Swipe v0.1 by henryisaway\nPlease report any bugs at https://github.com/henryisaway/Swipe/issues\n\n";
 		viewProjects();
 
 		std::cout << "\n+---------------------------+\n";
@@ -108,22 +133,18 @@ public:
 		}
 	}
 
-	void createProject(const string& name){
-		string filepath = ".swipe/" + name + ".swipe";
-		std::ofstream file(filepath);
-		file.close();
-	}
-
-	void createTask(const string& name, const string& description){
-		Task task(name, description);
-	}
 };
 
 int main(int argc, char** argv){
 	Swipe swipe;
+	
+	string name = "Test";
+	string desc = "This task is a test.";
+	string stat = "0";
+	Task task(name, desc, stat);
 
 	if(argc < 2){
-		swipe.run();
+		swipe.saveTask(".swipe/Jynx.swipe", task);
 	} else {
 		string arg = argv[1];
 	}
