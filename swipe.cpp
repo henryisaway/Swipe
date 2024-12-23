@@ -131,47 +131,12 @@ private:
 			std::cout << "-----------------\n";
 		}
 	}
-
-	void handleTaskManagement(){
-		char action;
-
-		std::cout << "[c] Create new task\n";
-		std::cout << "[d] Delete task\n";
-		std::cout << "[m] Mark task as done\n";
-		std::cout << "[q] Quit Swipe\n";
-		std::cout << "What would you like to do? ";
-
-		while(1){
-			std::cin >> action;
-
-			if(action == 'q'){
-				std::cout << "Quitting Swipe.\n";
-				exit(0);
-			} else {
-				std::cout << "Invalid command, try again.\n";
-			}
-		}
-	}
-
-	std::map<int, string> m_projects;
-	std::map<int, Task> m_tasks;		// Tasks from the loaded project file
-	string directory;
-
-public:
-	Swipe(){
+	
+	void mainMenu0(int& state){
 		system("clear");
-		if(!filesystem::exists(".swipe")){
-			filesystem::create_directory(".swipe");
-		}
-
-		m_projects = getProjects();
-	}
-
-	void run(){
 		char action;
-		int index;
 		bool running = 1;
-		std::cout << "Swipe v0.1 by henryisaway\nPlease report any bugs at https://github.com/henryisaway/Swipe/issues\n\n";
+		std::cout << "Swipe v0.1 by henryisaway\nPlease report any bugs at https://github.com/henryisaway/Swipe/issues\n";
 
 		std::cout << "+---------------------------+\n";
 		std::cout << "[o] Open a project\n";
@@ -186,25 +151,85 @@ public:
 			if(action == 'o'){
 				viewProjects();
 				std::cout << "Which project do you want to open? ";
-				std::cin >> index;
-
-				system("clear");
-				auto item = m_projects.find(index);
-				directory = item->second;
-
-				loadTasks(directory);
-				viewTasks();
-
-				handleTaskManagement();
+				std::cin >> m_cursor;
+				state = 1;
+				running = 0;
 			} else if(action == 's'){
-				//something goes here
+				// something goes here
 			} else if(action == 'd'){
-				//something goes here
+				// something goes here
 			} else if(action == 'q'){
-				std::cout << "Quitting Swipe.\n";
+				stte = -1;
 				running = 0;
 			} else {
 				std::cout << "Invalid command, try again.\n";
+			}
+		}
+	}
+
+	void taskManagement1(int& state){
+		system("clear");
+		int running = 1;
+		auto item = m_projects.find(m_cursor);
+		directory = item->second;
+
+		loadTasks(directory);
+		viewTasks();
+		char action;
+
+		std::cout << "[c] Create new task\n";
+		std::cout << "[d] Delete task\n";
+		std::cout << "[m] Mark task as done\n";
+		std::cout << "[r] Return to main menu\n";
+		std::cout << "[q] Quit Swipe\n";
+		std::cout << "What would you like to do? ";
+
+		while(running){
+			std::cin >> action;
+
+			if(action == 'r'){
+				state = 0;
+				running = 0;
+			} else if(action == 'q'){
+				state = -1;
+				running = 0;
+			} else {
+				std::cout << "Invalid command, try again.\n";
+			}
+		}
+	}
+
+	std::map<int, string> m_projects;
+	std::map<int, Task> m_tasks;		// Tasks from the loaded project file
+	string directory;
+	int m_cursor;
+
+public:
+	Swipe(){
+		system("clear");
+		if(!filesystem::exists(".swipe")){
+			filesystem::create_directory(".swipe");
+		}
+
+		m_projects = getProjects();
+		m_cursor = 0;
+	}
+
+	void run(){
+		int state = 0;
+		int running = 1;
+
+		while(running){
+			switch(state){
+			case 0:
+				mainMenu0(state);
+				break;
+			case 1:
+				taskManagement1(state);
+				break;
+			default:
+				std::cout << "Quitting Swipe.\n";
+				exit(1);
 			}
 		}
 	}
