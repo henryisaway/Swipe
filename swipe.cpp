@@ -87,11 +87,8 @@ private:
 		return projects;
 	}
 
-	void printProject(const string& project){
-		for(int i = 7; i < project.length() - 6; i++){ // This strips the project name out of the filename
-			std::cout << project[i];
-		}
-		std::cout << "\n";
+	string getProject(const string& project){
+		return project.substr(7, project.length() - 13);
 	}
 
 	void viewProjects(){
@@ -100,7 +97,7 @@ private:
 
 		for(const auto& project : m_projects){
 			std::cout << ANSI_COLOUR_BLUE << project.first << ANSI_COLOUR_RESET<< ". ";
-			printProject(project.second);
+			std::cout << getProject(project.second) << "\n";
 		}
 	}
 
@@ -165,6 +162,7 @@ private:
 		bool running = 1;
 		
 		while(running){
+			m_projects = getProjects();
 			system("clear");
 			
 			std::cout << "Swipe v0.2 by henryisaway\nPlease report any bugs at https://github.com/henryisaway/Swipe/issues\n";
@@ -172,7 +170,7 @@ private:
 			std::cout << "+---------------------------+\n";
 			std::cout << "[o] Open a project\n";
 			std::cout << "[c] Create a new project\n";
-			std::cout << "[d] Delete project\n";
+			std::cout << "[r] Remove project\n";
 			std::cout << "[q] Quit Swipe\n";
 			std::cout << "+---------------------------+\n";
 			std::cout << "What would you like to do? ";
@@ -185,9 +183,32 @@ private:
 				state = 1;
 				running = 0;
 			} else if(action == 'c'){
-				// something goes here
-			} else if(action == 'd'){
-				// something goes here
+				std::cout << "What is the name of the new project? ";
+				string projectName;
+				std::cin >> projectName;
+				createProject(projectName);
+			} else if(action == 'r'){
+				viewProjects();
+				std::cout << "Which project do you want to remove? ";
+				std::cin >> m_cursor;
+				auto project = m_projects.find(m_cursor);
+
+				std::cout << "Are you sure you want to remove " << getProject(project->second) << "?" ANSI_COLOUR_RED " This action cannot be undone " ANSI_COLOUR_RESET "[y/n] ";
+				char confirmation;
+				std::cin >> confirmation;
+
+				if(confirmation == 'y'){
+					const char* cStrDirectory = project->second.c_str();
+					std::remove(cStrDirectory);
+				} else if(confirmation == 'n'){
+					std::cout << "Aborted, press Enter to continue.";
+					std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+					std::cin.get();
+				} else {
+					std::cout << "Unrecognized option, action was aborted. Press Enter to continue.";
+					std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+					std::cin.get();
+				}
 			} else if(action == 'q'){
 				state = -1;
 				running = 0;
@@ -248,16 +269,13 @@ private:
 				std::cin >> m_cursor;
 				auto task = m_tasks.find(m_cursor);
 
-				std::cout << "Are you sure you want to remove " << task->second.getName() << "? This action cannot be undone [y/n] ";
+				std::cout << "Are you sure you want to remove " << task->second.getName() << "?" ANSI_COLOUR_RED " This action cannot be undone " ANSI_COLOUR_RESET "[y/n] ";
 				char confirmation;
 				std::cin >> confirmation;
 
 				if(confirmation == 'y'){
 					m_tasks.erase(task->first);
 					saveTasks(directory);
-					std::cout << "Task deleted, press Enter to continue.";
-					std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
-					std::cin.get();
 				} else if(confirmation == 'n'){
 					std::cout << "Aborted, press Enter to continue.";
 					std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
@@ -290,8 +308,6 @@ public:
 		if(!filesystem::exists(".swipe")){
 			filesystem::create_directory(".swipe");
 		}
-
-		m_projects = getProjects();
 		m_cursor = 0;
 	}
 
