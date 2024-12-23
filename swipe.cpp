@@ -173,11 +173,12 @@ public:
 		bool running = 1;
 		std::cout << "Swipe v0.1 by henryisaway\nPlease report any bugs at https://github.com/henryisaway/Swipe/issues\n\n";
 
-		std::cout << "\n+---------------------------+\n";
+		std::cout << "+---------------------------+\n";
 		std::cout << "[o] Open a project\n";
 		std::cout << "[c] Create a new project\n";
 		std::cout << "[d] Delete project\n";
 		std::cout << "[q] Quit Swipe\n";
+		std::cout << "+---------------------------+\n";
 		std::cout << "What would you like to do? ";
 
 		while(running){
