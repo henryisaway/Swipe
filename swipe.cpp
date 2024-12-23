@@ -2,7 +2,7 @@
 #include <cstdlib>
 #include <filesystem>
 #include <fstream>
-#include <unordered_map>
+#include <map>
 #include "colours.h"
 
 using string = std::string;
@@ -30,34 +30,41 @@ public:
 		return m_description;
 	}
 
-	char getStatus(){
-		int ascii = m_status;
-		return (char)(ascii + 48);
+	string getStatus(){
+		if(m_status){
+			return "Done!";
+		} else {
+			return "Pending";
+		}
 	}
 
 	void printTask(){
-		std::cout << m_name << "\n";
+		if(m_status){
+			std::cout << ANSI_COLOUR_GREEN + m_name + ANSI_COLOUR_RESET << "\n";
+		} else {
+			std::cout << ANSI_COLOUR_RED + m_name + ANSI_COLOUR_RESET << "\n";
+		}
 		std::cout << m_description << "\n";
-		std::cout << m_status << "\n";
+		std::cout << "This task is " << getStatus() << "\n";
 	}
 };
 
 class Swipe{
 private:
-	std::unordered_map<int, string> getProjects(){
+	// This function loads all projects into a projects map
+	std::map<int, string> getProjects(){
 		string path = ".swipe";
-		std::unordered_map<int, string> projects;
+		std::map<int, string> projects;
 		int i = 1;
 		for(const auto& project : filesystem::directory_iterator(path)){
-			std::pair<int, string> newProject(i, project.path().string());
-			projects.insert(newProject);
+			projects.emplace(i, project.path().string());
 			i++;
 		}
 		return projects;
 	}
 
 	void printProject(const string& project){
-		for(int i = 7; i < project.length() - 6; i++){
+		for(int i = 7; i < project.length() - 6; i++){ // This strips the project name out of the filename
 			std::cout << project[i];
 		}
 		std::cout << "\n";
@@ -93,6 +100,7 @@ private:
 			file << "Desc: " << task.second.getDescription() << "\n";
 			file << "Stat: " << task.second.getStatus() << "\n";	
 		}
+		
 		file.close();
 	}
 
@@ -103,7 +111,7 @@ private:
 		}
 
 		string line, name, desc, stat;
-		int i = 0;
+		int i = 1;
 		while(std::getline(file, line)){
 			name = line.substr(6);
 			std::getline(file, line);
@@ -111,15 +119,42 @@ private:
 			std::getline(file, line);
 			stat = line.substr(6);
 
-			Task task(name, desc, stat);
-			std::pair<int, Task> taskpair(i, task);
-			m_tasks.insert(taskpair);
+			m_tasks.emplace(i, Task(name, desc, stat));
 			i++;
 		}
 	}
 
-	std::unordered_map<int, string> m_projects;
-	std::unordered_map<int, Task> m_tasks;		// Tasks from the loaded project file
+	void viewTasks(){
+		for(auto& task : m_tasks){
+			std::cout << task.first << ". ";
+			task.second.printTask();
+			std::cout << "-----------------\n";
+		}
+	}
+
+	void handleTaskManagement(){
+		char action;
+
+		std::cout << "[c] Create new task\n";
+		std::cout << "[d] Delete task\n";
+		std::cout << "[m] Mark task as done\n";
+		std::cout << "[q] Quit Swipe\n";
+		std::cout << "What would you like to do? ";
+
+		while(1){
+			std::cin >> action;
+
+			if(action == 'q'){
+				std::cout << "Quitting Swipe.\n";
+				exit(0);
+			} else {
+				std::cout << "Invalid command, try again.\n";
+			}
+		}
+	}
+
+	std::map<int, string> m_projects;
+	std::map<int, Task> m_tasks;		// Tasks from the loaded project file
 	string directory;
 
 public:
@@ -133,31 +168,41 @@ public:
 	}
 
 	void run(){
-		char option;
+		char action;
+		int index;
 		bool running = 1;
 		std::cout << "Swipe v0.1 by henryisaway\nPlease report any bugs at https://github.com/henryisaway/Swipe/issues\n\n";
-		viewProjects();
 
 		std::cout << "\n+---------------------------+\n";
 		std::cout << "[o] Open a project\n";
-		std::cout << "[s] Start new project\n";
+		std::cout << "[c] Create a new project\n";
 		std::cout << "[d] Delete project\n";
-		std::cout << "[q] Quite Swipe\n";
+		std::cout << "[q] Quit Swipe\n";
 		std::cout << "What would you like to do? ";
 
 		while(running){
-			std::cin >> option;
-			if(option == 'o'){
+			std::cin >> action;
+			if(action == 'o'){
+				viewProjects();
+				std::cout << "Which project do you want to open? ";
+				std::cin >> index;
+
+				system("clear");
+				auto item = m_projects.find(index);
+				directory = item->second;
+
+				loadTasks(directory);
+				viewTasks();
+
+				handleTaskManagement();
+			} else if(action == 's'){
 				//something goes here
-			} else if(option == 's'){
+			} else if(action == 'd'){
 				//something goes here
-			} else if(option == 'd'){
-				//something goes here
-			} else if(option == 'q'){
+			} else if(action == 'q'){
 				std::cout << "Quitting Swipe.\n";
 				running = 0;
-			}
-			 else {
+			} else {
 				std::cout << "Invalid command, try again.\n";
 			}
 		}
