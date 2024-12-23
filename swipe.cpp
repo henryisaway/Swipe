@@ -165,7 +165,7 @@ private:
 			m_projects = getProjects();
 			system("clear");
 			
-			std::cout << "Swipe v0.2 by henryisaway\nPlease report any bugs at https://github.com/henryisaway/Swipe/issues\n";
+			std::cout << "Swipe v0.3 by henryisaway\nPlease report any bugs at https://github.com/henryisaway/Swipe/issues\n";
 
 			std::cout << "+---------------------------+\n";
 			std::cout << "[o] Open a project\n";
