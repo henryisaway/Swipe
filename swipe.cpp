@@ -12,7 +12,7 @@ class Task{
 private:
 	string m_name;
 	string m_description;
-	bool m_status;
+	int m_status;
 
 public:
 	Task(string& name, string& description, string& status){
@@ -31,16 +31,40 @@ public:
 	}
 
 	string getStatus(){
-		if(m_status){
+		if(m_status == 2){
 			return "Done!";
+		} else if(m_status == 1){
+			return "Ongoing";
 		} else {
 			return "Pending";
 		}
 	}
 
+	int getStatusID(){
+		return m_status;
+	}
+
+	void markAsDone(){
+		if(m_status == 2){
+			m_status = 0;
+		} else {
+			m_status = 2;
+		}
+	}
+
+	void markAsOngoing(){
+		if(m_status == 1){
+			m_status = 0;
+		} else {
+			m_status = 1;
+		}
+	}
+
 	void printTask(){
-		if(m_status){
+		if(m_status == 2){
 			std::cout << ANSI_COLOUR_GREEN + m_name + ANSI_COLOUR_RESET << "\n";
+		} else if(m_status == 1){
+			std::cout << ANSI_COLOUR_YELLOW + m_name + ANSI_COLOUR_RESET << "\n";
 		} else {
 			std::cout << ANSI_COLOUR_RED + m_name + ANSI_COLOUR_RESET << "\n";
 		}
@@ -92,19 +116,21 @@ private:
 	}
 
 
-	void saveTasks(const string& filepath){ // TODO make Swipe remember working directory
+	void saveTasks(const string& filepath){
 		std::ofstream file(filepath);
 
 		for(auto& task : m_tasks){
 			file << "Task: " << task.second.getName() << "\n";
 			file << "Desc: " << task.second.getDescription() << "\n";
-			file << "Stat: " << task.second.getStatus() << "\n";	
+			file << "Stat: " << task.second.getStatusID() << "\n";	
 		}
 		
 		file.close();
 	}
 
 	void loadTasks(const string& filepath){
+		m_tasks.clear();
+
 		std::ifstream file(filepath);
 		if(!file.is_open()){
 			std::cout << "There was an error loading the project file.\n";
@@ -133,20 +159,22 @@ private:
 	}
 	
 	void mainMenu0(int& state){
-		system("clear");
 		char action;
 		bool running = 1;
-		std::cout << "Swipe v0.1 by henryisaway\nPlease report any bugs at https://github.com/henryisaway/Swipe/issues\n";
-
-		std::cout << "+---------------------------+\n";
-		std::cout << "[o] Open a project\n";
-		std::cout << "[c] Create a new project\n";
-		std::cout << "[d] Delete project\n";
-		std::cout << "[q] Quit Swipe\n";
-		std::cout << "+---------------------------+\n";
-		std::cout << "What would you like to do? ";
-
+		
 		while(running){
+			system("clear");
+			
+			std::cout << "Swipe v0.1 by henryisaway\nPlease report any bugs at https://github.com/henryisaway/Swipe/issues\n";
+
+			std::cout << "+---------------------------+\n";
+			std::cout << "[o] Open a project\n";
+			std::cout << "[c] Create a new project\n";
+			std::cout << "[d] Delete project\n";
+			std::cout << "[q] Quit Swipe\n";
+			std::cout << "+---------------------------+\n";
+			std::cout << "What would you like to do? ";
+
 			std::cin >> action;
 			if(action == 'o'){
 				viewProjects();
@@ -154,12 +182,12 @@ private:
 				std::cin >> m_cursor;
 				state = 1;
 				running = 0;
-			} else if(action == 's'){
+			} else if(action == 'c'){
 				// something goes here
 			} else if(action == 'd'){
 				// something goes here
 			} else if(action == 'q'){
-				stte = -1;
+				state = -1;
 				running = 0;
 			} else {
 				std::cout << "Invalid command, try again.\n";
@@ -168,26 +196,41 @@ private:
 	}
 
 	void taskManagement1(int& state){
-		system("clear");
 		int running = 1;
 		auto item = m_projects.find(m_cursor);
 		directory = item->second;
-
-		loadTasks(directory);
-		viewTasks();
-		char action;
-
-		std::cout << "[c] Create new task\n";
-		std::cout << "[d] Delete task\n";
-		std::cout << "[m] Mark task as done\n";
-		std::cout << "[r] Return to main menu\n";
-		std::cout << "[q] Quit Swipe\n";
-		std::cout << "What would you like to do? ";
-
 		while(running){
+			system("clear");
+
+			loadTasks(directory);
+			viewTasks();
+
+			char action;
+
+			std::cout << "[c] Create new task\n";
+			std::cout << "[o] Mark/Unmark task as 'Ongoing'\n";
+			std::cout << "[d] Mark/Unmark task as 'Done'\n";
+			std::cout << "[r] Remove task\n";
+			std::cout << "[b] Back to main menu\n";
+			std::cout << "[q] Quit Swipe\n";
+			std::cout << "What would you like to do? ";
+
 			std::cin >> action;
 
-			if(action == 'r'){
+			if(action == 'o'){
+				std::cout << "Which task do you want to mark/unmark as ongoing? ";
+				std::cin >> m_cursor;
+				auto task = m_tasks.find(m_cursor);
+				task->second.markAsOngoing();
+				saveTasks(directory);
+			} else if(action == 'd'){
+				std::cout << "Which task do you want to mark/unmark as done? ";
+				std::cin >> m_cursor;
+				auto task = m_tasks.find(m_cursor);
+				task->second.markAsDone();
+				saveTasks(directory);
+			}
+			if(action == 'b'){
 				state = 0;
 				running = 0;
 			} else if(action == 'q'){
