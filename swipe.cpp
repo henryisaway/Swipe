@@ -77,18 +77,18 @@ class Swipe{
 private:
 	// This function loads all projects into a projects map
 	std::map<int, string> getProjects(){
-		string path = ".swipe";
 		std::map<int, string> projects;
 		int i = 1;
-		for(const auto& project : filesystem::directory_iterator(path)){
+		for(const auto& project : filesystem::directory_iterator(swipeDir)){
 			projects.emplace(i, project.path().string());
 			i++;
 		}
 		return projects;
 	}
 
-	string getProject(const string& project){
-		return project.substr(7, project.length() - 13);
+	string getProject(const filesystem::path& path){
+		string filename = path.filename().string();
+		return filename.substr(0, filename.size() - 6);
 	}
 
 	void viewProjects(){
@@ -102,7 +102,7 @@ private:
 	}
 
 	void createProject(const string& name){
-		string filepath = ".swipe/" + name + ".swipe";
+		string filepath = filesystem::path(swipeDir) / name / ".swipe";
 		std::ofstream file(filepath);
 		file.close();
 	}
@@ -169,6 +169,7 @@ private:
 
 			std::cout << "+---------------------------+\n";
 			std::cout << "[o] Open a project\n";
+			std::cout << "[v] View projects\n";
 			std::cout << "[c] Create a new project\n";
 			std::cout << "[r] Remove project\n";
 			std::cout << "[q] Quit Swipe\n";
@@ -182,6 +183,11 @@ private:
 				std::cin >> m_cursor;
 				state = 1;
 				running = 0;
+			} else if(action == 'v'){
+				viewProjects();
+				std::cout << "Press Enter to continue.";
+				std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+				std::cin.get();
 			} else if(action == 'c'){
 				std::cout << "What is the name of the new project? ";
 				string projectName;
@@ -299,15 +305,25 @@ private:
 
 	std::map<int, string> m_projects;
 	std::map<int, Task> m_tasks;		// Tasks from the loaded project file
-	string directory;
+	filesystem::path directory;
 	int m_cursor;
+	const char* homeDir;
+	filesystem::path swipeDir;
 
 public:
 	Swipe(){
+		homeDir = std::getenv("HOME");
+	    if (!homeDir) {
+	        std::cerr << "Error: HOME environment variable not set.\n";
+	    }
+
+	    swipeDir = filesystem::path(homeDir) / ".swipe";
+
 		system("clear");
-		if(!filesystem::exists(".swipe")){
-			filesystem::create_directory(".swipe");
+		if(!filesystem::exists(swipeDir)){
+			filesystem::create_directory(swipeDir);
 		}
+
 		m_cursor = 0;
 	}
 
