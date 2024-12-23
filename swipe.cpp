@@ -243,8 +243,28 @@ private:
 				auto task = m_tasks.find(m_cursor);
 				task->second.markAsDone();
 				saveTasks(directory);
-			}
-			if(action == 'b'){
+			} else if(action == 'r'){
+				std::cout << "Which task do you want to remove? ";
+				std::cin >> m_cursor;
+				auto task = m_tasks.find(m_cursor);
+
+				std::cout << "Are you sure you want to remove " << task->second.getName() << "? This action cannot be undone [y/n] ";
+				char confirmation;
+				std::cin >> confirmation;
+
+				if(confirmation == 'y'){
+					m_tasks.erase(task->first);
+					saveTasks(directory);
+				} else if(confirmation == 'n'){
+					std::cout << "Aborted, Press Enter to continue.";
+					std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+					std::cin.get();
+				} else {
+					std::cout << "Unrecognized option, action was aborted. Press Enter to continue.";
+					std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+					std::cin.get();
+				}
+			} else if(action == 'b'){
 				state = 0;
 				running = 0;
 			} else if(action == 'q'){
