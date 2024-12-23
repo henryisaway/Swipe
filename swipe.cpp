@@ -167,7 +167,7 @@ private:
 		while(running){
 			system("clear");
 			
-			std::cout << "Swipe v0.1 by henryisaway\nPlease report any bugs at https://github.com/henryisaway/Swipe/issues\n";
+			std::cout << "Swipe v0.2 by henryisaway\nPlease report any bugs at https://github.com/henryisaway/Swipe/issues\n";
 
 			std::cout << "+---------------------------+\n";
 			std::cout << "[o] Open a project\n";
@@ -255,8 +255,11 @@ private:
 				if(confirmation == 'y'){
 					m_tasks.erase(task->first);
 					saveTasks(directory);
+					std::cout << "Task deleted, press Enter to continue.";
+					std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+					std::cin.get();
 				} else if(confirmation == 'n'){
-					std::cout << "Aborted, Press Enter to continue.";
+					std::cout << "Aborted, press Enter to continue.";
 					std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
 					std::cin.get();
 				} else {
