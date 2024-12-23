@@ -110,9 +110,11 @@ private:
 		file.close();
 	}
 
-	void createTask(string& name, string& description){
+	void addTask(string& name, string& description){
 		string status = "0";
 		Task task(name, description, status);
+
+		m_tasks.emplace(m_tasks.size() + 1, task);
 	}
 
 
@@ -197,8 +199,9 @@ private:
 
 	void taskManagement1(int& state){
 		int running = 1;
-		auto item = m_projects.find(m_cursor);
-		directory = item->second;
+		auto project = m_projects.find(m_cursor);
+		directory = project->second;
+
 		while(running){
 			system("clear");
 
@@ -217,7 +220,18 @@ private:
 
 			std::cin >> action;
 
-			if(action == 'o'){
+			if(action == 'c'){
+				string taskName;
+				std::cout << "What is the name of the task? ";
+				std::getline(std::cin >> std::ws, taskName);
+
+				string taskDesc;
+				std::cout << "What is the task description? ";
+				std::getline(std::cin, taskDesc);
+
+				addTask(taskName, taskDesc);
+				saveTasks(directory);
+			} else if(action == 'o'){
 				std::cout << "Which task do you want to mark/unmark as ongoing? ";
 				std::cin >> m_cursor;
 				auto task = m_tasks.find(m_cursor);
